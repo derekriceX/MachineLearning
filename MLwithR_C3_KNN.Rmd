@@ -39,3 +39,48 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 print("hello machine learning")
 print("hello from GitHub")
 ```
+
+```{r}
+# transformation - normalizing numeric data 
+
+normalize <- function (x){
+  return ((x-min(x))/(max(x)-min(x)))
+  }
+
+```
+
+
+```{r}
+setwd("D:/Dropbox/13 - R-WD/MachineLearning/MachineLearning")
+wbcd <- read.csv("wisc_bc_data.csv",header=TRUE)
+head(wbcd)
+str(wbcd)
+```
+
+```{r}
+wbcd <- wbcd[-1] # remove 1st column from the dataset 
+table(wbcd$diagnosis) # diagnosis is the target outcome B=357 vs M=212 instances 
+str(wbcd$diagnosis) # currently a chr - need target to be a factor 
+wbcd$diagnosis <- factor(wbcd$diagnosis, levels =c("B","M"),labels = c("Benign","Malignant"))
+str(wbcd$diagnosis) # Factor w/ 2 levels "Benign","Malignant": 1 1 1 1 1 1 1 2 1 1 ...
+prop.table(table(wbcd$diagnosis)) #returns decimal fraction to eight decimal places
+round(prop.table(table(wbcd$diagnosis))*100,digits=1) # Benighn = 62.7 and Malignant = 37.3
+summary(wbcd) # 30 features all numeric three different measurements of 10 char 
+
+# all 30 features are on different scales
+
+normalize(c(1,2,3,4,5)) # function seems to be working 
+normalize(c(10,20,30,40,50)) # get the same normalized vaues 
+
+# the lapply() function takes a list and applies a specified function to each list element 
+# a data frame is a list of equal length vectors, we can use lapply() to apply normalize() to exach feature in the data frame 
+# the final step is to convert the list return by lapply() to a data frame using the as.data.frame() function 
+
+wbcd_n <- as.data.frame(lapply(wbcd[2:31],normalize))
+head(wbcd_n)
+
+```
+```{r}
+summary(wbcd_n)
+```
+
