@@ -11,10 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 install.packages("kernlab")
+
+
 ```
 
 ```{r}
 library(kernlab)
+
 ```
 
 
@@ -105,7 +108,105 @@ accuracy_values <- sapply(cost_values, function(x) {
  accuracy <- sum(agree) / nrow(letters_test)
  return (accuracy)
  })
-plot(cost_values, accuracy_values, type = "b")
+plot <-plot(cost_values, accuracy_values, type = "b")
+
+jpeg("svm_plot.jpg")  # Replace 'svm_plot.jpg' with your desired file name
+
+# Print the plot to the JPG file
+print(plot)
+
+# Close the JPG device to finalize the file
+dev.off()
+
 ```
 
+```{r}
+set.seed(12345)
+letter_classifier_rbf <- ksvm(Letter ~ ., data = letters_train,kernel = "rbfdot")
+letter_predictions_rbf <- predict(letter_classifier_rbf, letters_test)
+agreement_rbf <- ifelse(letter_predictions_rbf == letters_test$Letter,1,0)
+accuracy_rbf <- sum(agreement)/nrow(letters_test)
+accuracy_rbf
+table(agreement_rbf)
+
+prop.table(table(agreement_rbf))
+
+
+
+set.seed(12345)
+m <- ksvm(Letter ~ ., data = letters_train,kernel = "rbfdot")
+pred <- predict(m, letters_test)
+agree <- ifelse(pred == letters_test$Letter,1,0)
+accuracy_m <- sum(agree)/nrow(letters_test)
+accuracy_m
+table(agree)
+
+prop.table(table(agree))
+
+
+set.seed(12345)
+m <- ksvm(Letter ~ ., data = letters_train, kernel = "rbfdot")
+pred <- predict(m, letters_test)
+agree <- ifelse(pred == letters_test$Letter, 1, 0)
+accuracy2 <- sum(agree) / nrow(letters_test)
+ 
+accuracy2
+```
+
+
+
+
+```{r}
+
+## an attempt to print a plot of the SVM solution - see image "SVM image.png" dated 30JULY23
+
+# Assuming 'letters_train' contains the training dataset with 'Letter' as the target variable
+
+# Load required libraries
+library(kernlab)
+
+# Train the SVM model
+m <- ksvm(Letter ~ ., data = letters_train, kernel = "rbfdot", C = 10)
+
+# Extract the predictor variables from 'letters_train'
+predictor_vars <- subset(letters_train, select = -Letter)
+class(predictor_vars)
+head(predictor_vars)
+predictor_vars <- as.numeric(predictor_vars)
+
+predictor_vars <- as.data.frame(sapply(predictor_vars, as.numeric))
+
+class(predictor_vars)
+head(predictor_vars)
+
+
+# Check for missing values
+if (any(is.na(predictor_vars))) {
+  # Handle missing values (e.g., impute or remove rows with missing values)
+  predictor_vars <- na.omit(predictor_vars)  # Remove rows with missing values
+}
+
+# Check data types of predictor variables
+if (!is.numeric(predictor_vars$variable1) || !is.numeric(predictor_vars$variable2)) {
+  stop("Predictor variables must be numeric.")
+}
+
+# Predict class labels for a grid of points to visualize decision boundaries
+x1 <- seq(min(predictor_vars$variable1), max(predictor_vars$variable1), length.out = 100)
+x2 <- seq(min(predictor_vars$variable2), max(predictor_vars$variable2), length.out = 100)
+grid <- expand.grid(variable1 = x1, variable2 = x2)
+pred_labels <- predict(m, grid)
+
+# Plot the SVM decision boundaries and data points
+plot(predictor_vars, col = as.numeric(as.factor(letters_train$Letter)), pch = 19)
+contour(x1, x2, matrix(as.numeric(pred_labels), nrow = length(x1), ncol = length(x2)), levels = 0, add = TRUE)
+
+
+
+#plot <- plot(predictor_vars, col = as.numeric(as.factor(letters_train$Letter)), pch = 19)
+#contour(x1, x2, matrix(as.numeric(pred_labels), nrow = length(x1), ncol = length(x2)), levels = 0, add = TRUE)
+#jpeg("svm_plot.jpg")
+#print(plot)
+#dev.off()
+```
 
